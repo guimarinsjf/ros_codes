@@ -1,9 +1,10 @@
 import numpy as np
 from numpy import diff
+import math
 
 class shared(object):
 
-    def __init__(self , vmin, wmin, dc, dl, vd, srd, sld):
+    def __init__(self , angles, vmin, wmin, dc, dl, vd, srd, sld):
         
         
         
@@ -18,7 +19,8 @@ class shared(object):
         self.field=np.matrix([0,0])
         self.rol =None
         self.pit= None 
-        self.classe= 7              
+        self.classe= 7
+        self.angles=angles              
     
     
     def get_class(self):
@@ -30,37 +32,41 @@ class shared(object):
         d5 = np.sqrt(- 1.0*(self.rol - 0.15)*(45.2*self.pit - 972.0*self.rol + 139.0) - 1.0*(self.pit - 0.159)*(45.2*self.rol - 760.0*self.pit + 114.0))          
         d6 = np.sqrt((self.rol + 0.143)*(423.0*self.rol - 6.76*self.pit + 61.7) - 1.0*(self.pit - 0.18)*(6.76*self.rol - 792.0*self.pit + 143.0))   
         mahala=[d1,d2,d3,d4,d5,d6,d7]
-        classe = np.where(mahala==min(mahala))[0][0]+1
+        self.classe = np.where(mahala==min(mahala))[0][0]+1
     
     ######### Shared Control #########
     
     def get_fields(self,lasers,lamb1,lamb2):
         self.field=np.array([0,0]) 
         dist=100;
-        for k in range(len(self.angles)):           
-            x=lasers[k]*np.cos(self.angles[k])
-            y=lasers[k]*np.sin(self.angles[k])
+        for k in range(len(self.angles)):
             
-            if x <= self.dc:
-                if y < -self.dl:
-                    dist=-y-self.dl
-                    th=-np.pi/2
-                elif y > self.dl:
-                    dist=y-self.dl
-                    th=np.pi/2
-            else:
-                if y<-self.dl:
-                    dist=np.sqrt(pow(x-self.dc,2)+pow(y+self.dl,2))
-                    th=np.arctan2(y+self.dl,x-self.dc)
-                elif y>self.dl:
-                    dist=np.sqrt(pow(x-self.dc,2)+pow(y-self.dl,2))
-                    th=np.arctan2(y-self.dl,x-self.dc)
+            if math.isnan(lasers[k]):
+                self.field=self.field+0
+            else:   
+                x=lasers[k]*np.cos(self.angles[k])
+                y=lasers[k]*np.sin(self.angles[k])
+                
+                if x <= self.dc:
+                    if y < -self.dl:
+                        dist=-y-self.dl
+                        th=-np.pi/2
+                    elif y > self.dl:
+                        dist=y-self.dl
+                        th=np.pi/2
                 else:
-                    dist=x-self.dc
-                    th=0                     
-            if dist < 1.25:
-                beta= lamb1*th*th+lamb2     
-                self.field=self.field+[(-beta/dist)*np.cos(th),(-beta/dist)*np.sin(th)] 
+                    if y<-self.dl:
+                        dist=np.sqrt(pow(x-self.dc,2)+pow(y+self.dl,2))
+                        th=np.arctan2(y+self.dl,x-self.dc)
+                    elif y>self.dl:
+                        dist=np.sqrt(pow(x-self.dc,2)+pow(y-self.dl,2))
+                        th=np.arctan2(y-self.dl,x-self.dc)
+                    else:
+                        dist=x-self.dc
+                        th=0                     
+                if dist < 1.25:
+                    beta= lamb1*th*th+lamb2     
+                    self.field=self.field+[(-beta/dist)*np.cos(th),(-beta/dist)*np.sin(th)] 
                     
             
     
@@ -83,20 +89,20 @@ class shared(object):
             
         elif self.classe ==3:
             vels[0]=0
-            vels[1]=min(-self.wmin , alpha[2]*thr)                 
+            vels[1]=min(-self.wmin , alpha[1]*thr)                 
        
                 
         elif self.classe ==4:
             vels[0]=0
-            vels[1]=max(self.wmin , alpha[3]*thl)   
+            vels[1]=max(self.wmin , alpha[1]*thl)   
                 
         elif self.classe ==5:
-            vels[0]=max(self.vmin,alpha[4]*v)
-            vels[1]=min(-self.wmin , alpha[5]*thr)                    
+            vels[0]=max(self.vmin,alpha[2]*v)
+            vels[1]=min(-self.wmin , alpha[3]*thr)                    
             
         elif self.classe ==6:
-            vels[0]=max(self.vmin,alpha[4]*v)
-            vels[1]=max(self.wmin , alpha[5]*thl)                 
+            vels[0]=max(self.vmin,alpha[2]*v)
+            vels[1]=max(self.wmin , alpha[3]*thl)                 
 
                 
         elif self.classe ==7:             

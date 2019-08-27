@@ -46,6 +46,7 @@ def callback_laser(data):
 def talker():
          
     ###### SETUPPP #########
+    pub_vel = rospy.Publisher('/cmd_vel', Twist, queue_size = 1)
     rospy.init_node('driver', anonymous=False)
     rospy.Subscriber('/scan', LaserScan, callback_laser)  
     rate = rospy.Rate(15) # 10hz
@@ -72,7 +73,7 @@ def talker():
     #Object
     
     
-    myshared=head_class.shared(gains, xs, min_pass, max_pass, angles, vmin, wmin, dc, dl, vd, srd, sld)   
+    myshared=head_class.shared(angles, vmin, wmin, dc, dl, vd, srd, sld)   
     
 
     
@@ -82,12 +83,12 @@ def talker():
         ser.write('a'.encode())          
         myshared.get_fields(ranges,lamb1,lamb2)
         S=ser.readline()
-        [myshared.rol,myshared.pit]=np.fromstring(S, dtype=float, sep=' ')   
-        callback_imu()
-        myshared.get_vels(classe,alpha)
+        [myshared.rol,myshared.pit]=np.fromstring(S, dtype=float, sep=' ')  
+        myshared.get_class()
+        myshared.get_vels(alpha)
         twist.linear.x = myshared.v
         twist.angular.z =   myshared.w
-                    
+        print(twist, myshared.field)
         pub_vel.publish(twist)
         rate.sleep()
 
