@@ -92,7 +92,7 @@ void setup(){
 
    calibrate();
    t0=millis();
-   DT=0.05;
+   DT=0.02;
 }
 
 void loop(){

@@ -15,10 +15,22 @@ class shared(object):
         self.vd=vd
         self.srd=srd
         self.sld=sld        
-        self.field=np.matrix([0,0])                
+        self.field=np.matrix([0,0])
+        self.rol =None
+        self.pit= None 
+        self.classe= 7              
     
     
-    
+    def get_class(self):
+        d7 = np.sqrt((self.pit - 0.00181)*(743.0*self.pit + 69.1*self.rol - 2.08) + (self.rol - 0.0107)*(69.1*self.pit + 1277.0*self.rol - 13.7))
+        d3 = np.sqrt((self.pit + 0.00189)*(642.0*self.pit - 105.0*self.rol + 20.9) - 1.0*(self.rol - 0.188)*(105.0*self.pit - 1244.0*self.rol + 234.0))     
+        d4 = np.sqrt((self.pit + 0.00603)*(606.0*self.pit + 82.5*self.rol + 17.6) + (self.rol + 0.168)*(82.5*self.pit + 810.0*self.rol + 137.0))
+        d1 = np.sqrt((self.pit - 0.189)*(537.0*self.pit + 189.0*self.rol - 101.0) + (self.rol + 0.00515)*(189.0*self.pit + 1166.0*self.rol - 29.9))
+        d2 = np.sqrt((self.pit + 0.165)*(1344.0*self.pit + 68.7*self.rol + 221.0) + (self.rol - 0.00347)*(68.7*self.pit + 1766.0*self.rol + 5.25))
+        d5 = np.sqrt(- 1.0*(self.rol - 0.15)*(45.2*self.pit - 972.0*self.rol + 139.0) - 1.0*(self.pit - 0.159)*(45.2*self.rol - 760.0*self.pit + 114.0))          
+        d6 = np.sqrt((self.rol + 0.143)*(423.0*self.rol - 6.76*self.pit + 61.7) - 1.0*(self.pit - 0.18)*(6.76*self.rol - 792.0*self.pit + 143.0))   
+        mahala=[d1,d2,d3,d4,d5,d6,d7]
+        classe = np.where(mahala==min(mahala))[0][0]+1
     
     ######### Shared Control #########
     
@@ -52,81 +64,47 @@ class shared(object):
                     
             
     
-    def get_vels(self,classe,modo,alpha):
+    def get_vels(self,alpha):
         v=self.vd+self.field[0]
         sr=self.srd+[0,self.field[1]]
         sl=self.sld+[0,self.field[1]]       
         thr= np.arctan2(sr[1],sr[0])
         thl= np.arctan2(sl[1],sl[0])
-        modo = modo+1 
         vels=[0,0]
         
+        if self.classe ==1:
+            vels[0]=max(self.vmin,alpha[0]*v)
+            vels[1]=0                                       
+  
+                
+        elif self.classe ==2:
+            vels[0]=-self.vmin
+            vels[1]=0 
+            
+        elif self.classe ==3:
+            vels[0]=0
+            vels[1]=min(-self.wmin , alpha[2]*thr)                 
+       
+                
+        elif self.classe ==4:
+            vels[0]=0
+            vels[1]=max(self.wmin , alpha[3]*thl)   
+                
+        elif self.classe ==5:
+            vels[0]=max(self.vmin,alpha[4]*v)
+            vels[1]=min(-self.wmin , alpha[5]*thr)                    
+            
+        elif self.classe ==6:
+            vels[0]=max(self.vmin,alpha[4]*v)
+            vels[1]=max(self.wmin , alpha[5]*thl)                 
 
-        if classe ==1:
-            if modo ==3:
-                vels[0]=self.vmin
-                vels[1]=0                
-            elif modo ==2:
-                vels[0]=max(self.vmin,alpha[0]*v)
-                vels[1]=0                                       
-            elif modo ==1:                 
-                vels[0]=max(self.vmin,alpha[1]*v)
-                vels[1]=0 
                 
-        elif classe ==2:
-                vels[0]=-self.vmin
-                vels[1]=0 
-                
-        elif classe ==3:
-            if modo ==3:
-                vels[0]=0
-                vels[1]=-self.wmin                 
-            elif modo ==2:
-                vels[0]=0
-                vels[1]=min(-self.wmin , alpha[2]*thr)                 
-            elif modo ==1: 
-                vels[0]=0
-                vels[1]=min(-self.wmin , alpha[3]*thr)                 
-                
-        elif classe ==4:
-            if modo ==3:
-                vels[0]=0
-                vels[1]=self.wmin                     
-            elif modo ==2:
-                vels[0]=0
-                vels[1]=max(self.wmin , alpha[2]*thl)                   
-            elif modo ==1: 
-                vels[0]=0
-                vels[1]=max(self.wmin , alpha[3]*thl)   
-                
-        elif classe ==5:
-            if modo ==3:
-                vels[0]=self.vmin
-                vels[1]=-self.wmin                      
-            elif modo ==2:
-                vels[0]=max(self.vmin,alpha[4]*v)
-                vels[1]=min(-self.wmin , alpha[5]*thr)                  
-            elif modo ==1:  
-                vels[0]=max(self.vmin,alpha[6]*v)
-                vels[1]=min(-self.wmin , alpha[7]*thr)    
-                
-        elif classe ==6:
-            if modo ==3:
-                vels[0]=self.vmin
-                vels[1]=-self.wmin      
-            elif modo ==2:
-                vels[0]=max(self.vmin,alpha[4]*v)
-                vels[1]=max(self.wmin , alpha[5]*thl)                 
-            elif modo ==1:
-                vels[0]=max(self.vmin,alpha[6]*v)
-                vels[1]=max(self.wmin , alpha[7]*thl) 
-                
-        elif classe ==7:             
-                vels[0]=0
-                vels[1]=0 
+        elif self.classe ==7:             
+            vels[0]=0
+            vels[1]=0 
                
         self.v = vels[0]
-        self.w = vels[1]        
+        self.w = vels[1]     
     
 
       
