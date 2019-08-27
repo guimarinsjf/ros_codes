@@ -14,16 +14,16 @@ anglemax = None
 ranges= None
 odometry =[0,0,0]
 classe=4;
-vmin = 0.07
+vmin = 0.05
 wmin = 0.01
 dc = 1 
 dl = 0.40
 vd = 1
 srd = np.array([0.64,-1])
 sld = np.array([0.64, 1])
-lamb1=0.012
-lamb2=0.004
-alpha=[0.5, 0.8, 0.5, 0.6, 0.4, 0.3, 0.7, 0.3] 
+lamb1=0.013
+lamb2=0.005
+alpha=[0.5, 0.3, 0.4, 0.2] 
 ser = serial.Serial('/dev/rfcomm0', 9600)
 rol=0
 pit=0
@@ -88,7 +88,8 @@ def talker():
         myshared.get_vels(alpha)
         twist.linear.x = myshared.v
         twist.angular.z =   myshared.w
-        print(twist, myshared.field)
+        #print("range")
+        #print(ranges)
         pub_vel.publish(twist)
         rate.sleep()
 
