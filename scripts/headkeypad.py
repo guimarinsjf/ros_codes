@@ -110,65 +110,17 @@ def talker():
     #Object
     
     
-    myshared=Shared_Class.shared(gains, xs, min_pass, max_pass, angles, vmin, wmin, dc, dl, vd, srd, sld)   
+    myshared=head_class.shared(gains, xs, min_pass, max_pass, angles, vmin, wmin, dc, dl, vd, srd, sld)   
     
-    global relatorio
-    global relatorio_status
-    relatorio_status = 0
+
     
     ######## LOOOP  ########
     while not rospy.is_shutdown(): 
-        
-        
-            
-            
-        # Narrow Passage             
-        if status==3:   
-            
-            # odometry
-            ds=np.sqrt((x0-odometry[0])**2+(y0-odometry[1])**2)
-            dth=odometry[2]-th0
-            x0=odometry[0]
-            y0=odometry[1]
-            th0=odometry[2]   
-            if dth > np.pi:
-                dth=dth-2*np.pi
-            if dth < -np.pi:
-                dth = dth+2*np.pi 
                   
-            myshared.get_gates(ranges) 
-            myshared.localization()          
-            myshared.kalman(ds,dth) 
-            
-            if myshared.X[0]<0.55:
-                myshared.controler()
-                twist.linear.x = myshared.v
-                twist.angular.z =  myshared.w
-                relatorio=[relatorio,[odometry[0],odometry[1],odometry[2],0]]
-                
-            else:
-                twist.linear.x = 0
-                twist.angular.z =  0
-                pub_vel.publish(twist)
-                pub_state.publish('finished')
-        
-
-        # Manual Mode
-        if status in (0,1,2):
-            myshared.get_fields(ranges,lamb1,lamb2)
-            myshared.get_vels(classe,status,alpha)
-            twist.linear.x = myshared.v
-            twist.angular.z =   myshared.w
-            relatorio.append([odometry[0],odometry[1],odometry[2],classe])
-            print(classe,myshared.field)
-        
-        # Parked
-        if status in (4,5):
-            twist.linear.x = 0
-            twist.angular.z = 0
-            if relatorio_status ==0:
-                np.savetxt('marinstxt.txt',relatorio)
-                relatorio_status =1
+        myshared.get_fields(ranges,lamb1,lamb2)
+        myshared.get_vels(classe,status,alpha)
+        twist.linear.x = myshared.v
+        twist.angular.z =   myshared.w
                     
         pub_vel.publish(twist)
         rate.sleep()
