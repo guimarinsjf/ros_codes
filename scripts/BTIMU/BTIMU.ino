@@ -101,14 +101,14 @@ void loop(){
   t0=millis();
 
 
-  if (t > 50)
+  if (t > 20)
   {
     t=0;
     // Velocides
+    
+    request();
     gx= 0.000133*(float)GyX;
     gy= 0.000133*(float)GyY;
-  
-    request();
     get_angles();
 
     kalmanY = kalmanFilterY(pitch-inertial_pitch, gy);
