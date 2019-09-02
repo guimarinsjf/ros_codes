@@ -46,7 +46,7 @@ class shared(object):
             else:   
                 x=lasers[k]*np.cos(self.angles[k])
                 y=lasers[k]*np.sin(self.angles[k])
-                
+                th=0
                 if x <= self.dc:
                     if y < -self.dl:
                         dist=-y-self.dl
@@ -63,9 +63,10 @@ class shared(object):
                         th=np.arctan2(y-self.dl,x-self.dc)
                     else:
                         dist=x-self.dc
-                        th=0                     
-                if dist < 1.25:
-                    beta= lamb1*th*th+lamb2     
+                        th=0                   
+                if dist > 0:                    
+                    beta= lamb1*th*th+lamb2 
+                       
                     self.field=self.field+[(-beta/dist)*np.cos(th),(-beta/dist)*np.sin(th)] 
                     
             
@@ -84,7 +85,7 @@ class shared(object):
   
                 
         elif self.classe ==2:
-            vels[0]=-self.vmin
+            vels[0]=-2*self.vmin
             vels[1]=0 
             
         elif self.classe ==3:

@@ -2,6 +2,7 @@
 import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
+import matplotlib.pyplot as plt
 import head_class
 import numpy as np
 import serial
@@ -12,19 +13,17 @@ Lasers = None
 anglemin = None
 anglemax = None
 ranges= None
-odometry =[0,0,0]
-classe=4;
+classe=7
 vmin = 0.05
 wmin = 0.01
-dc = 1 
-dl = 0.40
+dc = 1.10 
+dl = 0.42
 vd = 1
 srd = np.array([0.64,-1])
 sld = np.array([0.64, 1])
-lamb1=0.013
-lamb2=0.005
-alpha=[0.5, 0.3, 0.4, 0.2] 
-ser = serial.Serial('/dev/rfcomm0', 9600)
+lamb1=0.003
+lamb2=0.012
+alpha=[0.6,0.5, 0.50 , 0.25] 
 rol=0
 pit=0
 
@@ -42,6 +41,8 @@ def callback_laser(data):
     ranges = np.take(Lasers.ranges,range(0,640,9))
     
 
+
+
     
 def talker():
          
@@ -51,6 +52,12 @@ def talker():
     rospy.Subscriber('/scan', LaserScan, callback_laser)  
     rate = rospy.Rate(15) # 10hz
     
+    control = False
+
+   
+    ser = serial.Serial('/dev/rfcomm0', 9600)
+    ser.write('b'.encode())
+
     # Velocity Message    
     twist = Twist()
     twist.linear.x = 0 
@@ -61,7 +68,7 @@ def talker():
     twist.angular.z = 0
     rospy.sleep(2) 
     
-    ser.write('b'.encode())
+    
     
     # Rangefinder Angles
     min_angle=Lasers.angle_min
@@ -88,8 +95,7 @@ def talker():
         myshared.get_vels(alpha)
         twist.linear.x = myshared.v
         twist.angular.z =   myshared.w
-        #print("range")
-        #print(ranges)
+        print(twist.linear.x,twist.angular.z,myshared.field)
         pub_vel.publish(twist)
         rate.sleep()
 
