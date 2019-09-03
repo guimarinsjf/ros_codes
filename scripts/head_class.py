@@ -36,13 +36,16 @@ class shared(object):
     
     ######### Shared Control #########
     
-    def get_fields(self,lasers,lamb1,lamb2):
-        self.field=np.array([0,0]) 
+    def get_fields(self,lasers, beta):
+        field=np.array([[0.0,0],[0,0],[0,0],[0,0],[0,0]]) 
+        count=np.array([[1.0],[1],[1],[1],[1]])
         dist=100;
+        idx=0
         for k in range(len(self.angles)):
             
+            
             if math.isnan(lasers[k]):
-                self.field=self.field+0
+                pass   
             else:   
                 x=lasers[k]*np.cos(self.angles[k])
                 y=lasers[k]*np.sin(self.angles[k])
@@ -51,23 +54,28 @@ class shared(object):
                     if y < -self.dl:
                         dist=-y-self.dl
                         th=-np.pi/2
+                        idx=0
                     elif y > self.dl:
                         dist=y-self.dl
                         th=np.pi/2
+                        idx=4
                 else:
                     if y<-self.dl:
                         dist=np.sqrt(pow(x-self.dc,2)+pow(y+self.dl,2))
                         th=np.arctan2(y+self.dl,x-self.dc)
+                        idx=1
                     elif y>self.dl:
                         dist=np.sqrt(pow(x-self.dc,2)+pow(y-self.dl,2))
                         th=np.arctan2(y-self.dl,x-self.dc)
+                        idx=3
                     else:
                         dist=x-self.dc
-                        th=0                   
-                if dist > 0:                    
-                    beta= lamb1*th*th+lamb2 
-                       
-                    self.field=self.field+[(-beta/dist)*np.cos(th),(-beta/dist)*np.sin(th)] 
+                        th=0 
+                        idx=2                  
+                if dist <1.2 and dist > 0:                     
+                    field[idx]=field[idx].copy()+np.array([(-beta[idx]/dist)*np.cos(th),(-beta[idx]/dist)*np.sin(th)])
+                    count[idx,0]=count[idx,0]+1        
+        self.field=np.sum(field/count, axis=0)           
                     
             
     

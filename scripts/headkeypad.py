@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
@@ -8,7 +9,6 @@ import numpy as np
 import serial
 
 
-status=4
 Lasers = None
 anglemin = None
 anglemax = None
@@ -16,14 +16,17 @@ ranges= None
 classe=7
 vmin = 0.05
 wmin = 0.01
-dc = 1.10 
-dl = 0.42
+dc = 1.1 
+dl = 0.40
 vd = 1
 srd = np.array([0.64,-1])
 sld = np.array([0.64, 1])
-lamb1=0.003
-lamb2=0.012
-alpha=[0.6,0.5, 0.50 , 0.25] 
+srd = np.array([0.64,-1])
+sld = np.array([0.64, 1])
+lamb1=0.006
+lamb2=0.009
+beta=[0.05, 0.04, 0.15, 0.04, 0.05]
+alpha=[0.5,0.5, 0.50 , 0.3] 
 rol=0
 pit=0
 
@@ -88,14 +91,14 @@ def talker():
     while not rospy.is_shutdown(): 
         
         ser.write('a'.encode())          
-        myshared.get_fields(ranges,lamb1,lamb2)
+        myshared.get_fields(ranges,beta)
         S=ser.readline()
         [myshared.rol,myshared.pit]=np.fromstring(S, dtype=float, sep=' ')  
         myshared.get_class()
         myshared.get_vels(alpha)
-        twist.linear.x = myshared.v
-        twist.angular.z =   myshared.w
-        print(twist.linear.x,twist.angular.z,myshared.field)
+        twist.linear.x = 0.7*twist.linear.x+ 0.3*myshared.v
+        twist.angular.z = 0.7*twist.angular.z + 0.3*myshared.w
+        #print(twist.linear.x,twist.angular.z,myshared.field)
         pub_vel.publish(twist)
         rate.sleep()
 
