@@ -3,7 +3,7 @@
 import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
-import matplotlib.pyplot as plt
+from std_msgs.msg import Float32MultiArray
 import head_class
 import numpy as np
 import serial
@@ -51,14 +51,15 @@ def talker():
          
     ###### SETUPPP #########
     pub_vel = rospy.Publisher('/cmd_vel', Twist, queue_size = 1)
+    pub_head = rospy.Publisher('head', Float32MultiArray, queue_size = 1)
     rospy.init_node('driver', anonymous=False)
     rospy.Subscriber('/scan', LaserScan, callback_laser)  
-    rate = rospy.Rate(15) # 10hz
+    rate = rospy.Rate(10) # 10hz
     
     control = False
 
    
-    ser = serial.Serial('/dev/rfcomm1', 9600)
+    ser = serial.Serial('/dev/rfcomm0', 9600)
     ser.write('b'.encode())
 
     # Velocity Message    
@@ -96,10 +97,12 @@ def talker():
         [myshared.rol,myshared.pit]=np.fromstring(S, dtype=float, sep=' ')  
         myshared.get_class()
         myshared.get_vels(alpha)
-        twist.linear.x = 0.7*twist.linear.x+ 0.3*myshared.v
-        twist.angular.z = 0.7*twist.angular.z + 0.3*myshared.w
+        twist.linear.x = 0.6*twist.linear.x+ 0.4*myshared.v
+        twist.angular.z = 0.6*twist.angular.z + 0.4*myshared.w
         #print(twist.linear.x,twist.angular.z,myshared.field)
         pub_vel.publish(twist)
+	headdata = Float32MultiArray(data=[myshared.rol,myshared.pit,myshared.classe,myshared.field[0],myshared.field[1]])
+	pub_head.publish(headdata)
         rate.sleep()
 
 if __name__ == '__main__':

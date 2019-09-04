@@ -89,7 +89,7 @@ class shared(object):
         
         if self.classe ==1:
             vels[0]=max(self.vmin,alpha[0]*v)
-            vels[1]=np.tanh(pow((thr+thl)/1.8,5))                                      
+            vels[1]=0.1*np.tanh(pow((thr+thl)/1.5,5))                                      
   
                 
         elif self.classe ==2:
